@@ -11,7 +11,7 @@ import { ScannerModal } from '../components/driver/ScannerModal';
 import { ManualEditModal } from '../components/driver/ManualEditModal';
 import { DriverHistoryModal } from '../components/driver/DriverHistoryModal';
 import { Modal } from '../components/common/Modal';
-import { Icon } from '../common/Icons';
+import { Icon } from '../components/common/Icons';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
