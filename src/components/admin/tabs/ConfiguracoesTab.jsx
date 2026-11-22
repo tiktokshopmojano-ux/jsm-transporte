@@ -12,6 +12,7 @@ export const ConfiguracoesTab = ({
   viagens = [],
   despesas = [],
   ocorrencias = [],
+  veiculos = [],
   onShowToast
 }) => {
   // Estado das Metas da Empresa
@@ -252,6 +253,15 @@ export const ConfiguracoesTab = ({
             >
               Ocorrências ({ocorrencias.length})
             </button>
+            <button
+              type="button"
+              onClick={() => setAbaLimpeza('veiculos')}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                abaLimpeza === 'veiculos' ? 'bg-red-500/20 text-red-300 border border-red-500/30' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Veículos ({veiculos.length})
+            </button>
           </div>
         </div>
 
@@ -328,6 +338,34 @@ export const ConfiguracoesTab = ({
                   <button
                     type="button"
                     onClick={() => setItemParaExcluir({ ...item, tipoColecao: 'ocorrencias', titulo: `Ocorrência "${item.tipo}" (${item.motorista})` })}
+                    className="py-1.5 px-3 bg-red-950/60 hover:bg-red-900/60 text-red-300 border border-red-800/80 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  >
+                    <Icon name="trash" className="w-3.5 h-3.5" />
+                    Excluir
+                  </button>
+                </div>
+              ))
+            )
+          )}
+
+          {abaLimpeza === 'veiculos' && (
+            veiculos.length === 0 ? (
+              <p className="text-xs text-slate-500 text-center py-6">Nenhum veículo encontrado no banco.</p>
+            ) : (
+              veiculos.map((item) => (
+                <div key={item.id} className="p-3 bg-[#0B1329] border border-slate-800 hover:border-red-500/40 rounded-xl flex items-center justify-between text-xs">
+                  <div>
+                    <p className="font-bold text-white flex items-center gap-2">
+                      <Icon name="truck" className="w-3.5 h-3.5 text-purple-400" />
+                      {item.placa} • {item.modelo}
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Odômetro: {(Number(item.odometro) || 0).toLocaleString('pt-BR')} km • Status: {item.status || 'Em Operação'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setItemParaExcluir({ ...item, tipoColecao: 'veiculos', titulo: `Veículo ${item.placa} (${item.modelo})` })}
                     className="py-1.5 px-3 bg-red-950/60 hover:bg-red-900/60 text-red-300 border border-red-800/80 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
                   >
                     <Icon name="trash" className="w-3.5 h-3.5" />

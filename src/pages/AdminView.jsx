@@ -165,6 +165,7 @@ export const AdminView = ({
             viagens={fbViagens}
             despesas={fbDespesas}
             ocorrencias={fbOcorrencias}
+            veiculos={fbVeiculos}
             onShowToast={onShowToast}
           />
         )}
