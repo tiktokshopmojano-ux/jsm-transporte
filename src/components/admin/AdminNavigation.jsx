@@ -15,11 +15,12 @@ export const AdminNavigation = ({
     { id: 'viagens', label: 'Viagens', icon: 'file-text' },
     {
       id: 'despesas',
-      label: 'Despesas',
+      label: 'Despesas Fixas',
       icon: 'fuel',
       badge: despesasPendentes > 0 ? despesasPendentes : null,
       badgeColor: 'bg-amber-500 text-slate-950'
     },
+    { id: 'lucro-liquido', label: 'Lucro Líquido', icon: 'wallet' },
     { id: 'frota', label: 'Frota', icon: 'truck' },
     { id: 'motoristas', label: 'Motoristas', icon: 'users' },
     {

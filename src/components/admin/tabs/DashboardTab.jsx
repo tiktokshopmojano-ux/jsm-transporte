@@ -11,13 +11,39 @@ export const DashboardTab = ({
   veiculos = [],
   motoristas = [],
   ocorrencias = [],
+  despesasFixasConfig = {},
   onSelectTab
 }) => {
-  // Cálculo de KPIs
-  const despesasAprovadas = despesas.filter((d) => d.status === 'Aprovada');
-  const totalDespesasValor = despesasAprovadas.reduce((acc, d) => acc + (Number(d.valor) || 0), 0);
+  // Cálculo de Obrigações Fixas + Diesel
+  const prestacaoFurgao = Number(despesasFixasConfig.prestacaoFurgao ?? 7000);
+  const seguroMaster = Number(despesasFixasConfig.seguroMaster ?? 680);
+  const rastreamento = Number(despesasFixasConfig.rastreamento ?? 70);
+  const ipva = Number(despesasFixasConfig.ipva ?? 550);
+  const salarioMotorista = Number(despesasFixasConfig.salarioMotorista ?? 3500);
+  const salarioAjudante = Number(despesasFixasConfig.salarioAjudante ?? 1800);
+  const impostos = Number(despesasFixasConfig.impostos ?? 850);
+
+  const totalDieselRegistrado = despesas
+    .filter((d) => d.status !== 'Rejeitada')
+    .reduce((acc, d) => acc + (Number(d.valor) || 0), 0);
+
+  const dieselEfetivo = despesasFixasConfig.usarDieselManual
+    ? Number(despesasFixasConfig.dieselAjusteManual ?? 0)
+    : totalDieselRegistrado;
+
+  const totalObrigacoes =
+    prestacaoFurgao +
+    dieselEfetivo +
+    seguroMaster +
+    rastreamento +
+    ipva +
+    salarioMotorista +
+    salarioAjudante +
+    impostos;
+
   const totalLitros = despesas.reduce((acc, d) => acc + (Number(d.litros) || 0), 0);
-  const lucroEstimado = totalRevenue - totalDespesasValor;
+  const lucroLiquidoReal = totalRevenue - totalObrigacoes;
+  const margemLiquida = totalRevenue > 0 ? ((lucroLiquidoReal / totalRevenue) * 100).toFixed(1) : 0;
 
   // Dados para projeção horária
   const chartData = [
@@ -70,18 +96,24 @@ export const DashboardTab = ({
           </p>
         </div>
 
-        {/* KPI 2: Lucro Operacional Estimado */}
-        <div className="bg-[#111C38] border border-slate-800 rounded-2xl p-5 shadow-xl relative overflow-hidden group hover:border-emerald-500/40 transition-all">
+        {/* KPI 2: Lucro Líquido Real */}
+        <div
+          onClick={() => onSelectTab && onSelectTab('lucro-liquido')}
+          className="bg-[#111C38] border border-slate-800 rounded-2xl p-5 shadow-xl relative overflow-hidden group hover:border-emerald-500/40 transition-all cursor-pointer"
+        >
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-bl-full pointer-events-none"></div>
           <div className="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase">
-            <span>Margem Operacional</span>
-            <Icon name="sparkles" className="w-4 h-4 text-emerald-400" />
+            <span>Lucro Líquido Real</span>
+            <Icon name="wallet" className="w-4 h-4 text-emerald-400" />
           </div>
-          <h2 className="text-2xl font-extrabold text-emerald-400 mt-2">
-            R$ {lucroEstimado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <h2 className={`text-2xl font-extrabold mt-2 ${
+            lucroLiquidoReal >= 0 ? 'text-emerald-400' : 'text-red-400'
+          }`}>
+            R$ {lucroLiquidoReal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </h2>
-          <p className="text-xs text-slate-400 mt-2">
-            Despesas deduzidas: R$ {totalDespesasValor.toFixed(2)}
+          <p className="text-xs text-slate-400 mt-2 flex items-center justify-between">
+            <span>Obrigações: -R$ {totalObrigacoes.toFixed(0)}</span>
+            <span className="text-emerald-400 font-bold">{margemLiquida}%</span>
           </p>
         </div>
 

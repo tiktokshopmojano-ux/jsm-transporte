@@ -45,6 +45,17 @@ export default function App() {
     diasUteisMes: 26,
     percentualExpansao: 20
   });
+  const [despesasFixasConfig, setDespesasFixasConfig] = useState({
+    prestacaoFurgao: 7000,
+    seguroMaster: 680,
+    rastreamento: 70,
+    ipva: 550,
+    salarioMotorista: 3500,
+    salarioAjudante: 1800,
+    impostos: 850,
+    dieselAjusteManual: 0,
+    usarDieselManual: false
+  });
   const [totalSystemRevenue, setTotalSystemRevenue] = useState(0);
   const [usedRomaneioRecords, setUsedRomaneioRecords] = useState([]);
 
@@ -163,6 +174,17 @@ export default function App() {
       (err) => console.warn('Metas padrão em uso:', err)
     );
 
+    // Listener de Despesas Fixas e Obrigações
+    const unsubDespesasFixas = onSnapshot(
+      doc(db, 'configuracoes', 'despesasFixas'),
+      (snap) => {
+        if (snap.exists()) {
+          setDespesasFixasConfig((prev) => ({ ...prev, ...snap.data() }));
+        }
+      },
+      (err) => console.warn('Despesas fixas padrão em uso:', err)
+    );
+
     return () => {
       unsubAuth();
       unsubMotoristas();
@@ -171,6 +193,7 @@ export default function App() {
       unsubOcorrencias();
       unsubViagens();
       unsubMetas();
+      unsubDespesasFixas();
     };
   }, []);
 
@@ -286,6 +309,7 @@ export default function App() {
         fbMotoristas={fbMotoristas}
         fbOcorrencias={fbOcorrencias}
         metasConfig={metasConfig}
+        despesasFixasConfig={despesasFixasConfig}
         onLogout={handleLogout}
         onShowToast={(t) => setToast(t)}
       />

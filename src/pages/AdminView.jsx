@@ -7,6 +7,7 @@ import { AdminNavigation } from '../components/admin/AdminNavigation';
 import { DashboardTab } from '../components/admin/tabs/DashboardTab';
 import { ViagensTab } from '../components/admin/tabs/ViagensTab';
 import { DespesasTab } from '../components/admin/tabs/DespesasTab';
+import { LucroLiquidoTab } from '../components/admin/tabs/LucroLiquidoTab';
 import { FrotaTab } from '../components/admin/tabs/FrotaTab';
 import { MotoristasTab } from '../components/admin/tabs/MotoristasTab';
 import { OcorrenciasTab } from '../components/admin/tabs/OcorrenciasTab';
@@ -23,6 +24,7 @@ export const AdminView = ({
   fbMotoristas = [],
   fbOcorrencias = [],
   metasConfig = {},
+  despesasFixasConfig = {},
   onLogout,
   onShowToast
 }) => {
@@ -58,6 +60,7 @@ export const AdminView = ({
             veiculos={fbVeiculos}
             motoristas={fbMotoristas}
             ocorrencias={fbOcorrencias}
+            despesasFixasConfig={despesasFixasConfig}
             onSelectTab={setActiveTab}
           />
         )}
@@ -67,7 +70,21 @@ export const AdminView = ({
         )}
 
         {activeTab === 'despesas' && (
-          <DespesasTab despesas={fbDespesas} onShowToast={onShowToast} />
+          <DespesasTab
+            despesas={fbDespesas}
+            despesasFixasConfig={despesasFixasConfig}
+            onShowToast={onShowToast}
+          />
+        )}
+
+        {activeTab === 'lucro-liquido' && (
+          <LucroLiquidoTab
+            totalRevenue={totalRevenue}
+            viagens={fbViagens}
+            despesas={fbDespesas}
+            despesasFixasConfig={despesasFixasConfig}
+            onSelectTab={setActiveTab}
+          />
         )}
 
         {activeTab === 'frota' && (
