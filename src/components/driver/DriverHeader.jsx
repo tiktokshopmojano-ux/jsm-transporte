@@ -4,7 +4,7 @@
 import React from 'react';
 import { Icon } from '../common/Icons';
 
-export const DriverHeader = ({ user, todayDate, onLogout, onOpenChecklist, checklistDone }) => {
+export const DriverHeader = ({ user, todayDate, onLogout }) => {
   const whatsappSuporte = '5511999999999'; // Central JSM Transporte
   const mensagemWpp = encodeURIComponent(`Olá, sou o motorista ${user.name} (Placa ${user.driverId}) e preciso de suporte com a rota de hoje.`);
 
@@ -16,13 +16,8 @@ export const DriverHeader = ({ user, todayDate, onLogout, onOpenChecklist, check
             <Icon name="truck" className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="font-bold text-sm leading-tight text-white flex items-center gap-1.5">
+            <h2 className="font-bold text-sm leading-tight text-white">
               {user.name}
-              {checklistDone && (
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  Inspeção OK
-                </span>
-              )}
             </h2>
             <p className="text-xs text-slate-400">
               Placa: <strong className="text-cyan-400">{user.driverId}</strong> • {todayDate}
@@ -41,20 +36,6 @@ export const DriverHeader = ({ user, todayDate, onLogout, onOpenChecklist, check
           >
             <Icon name="phone" className="w-4 h-4" />
           </a>
-
-          {/* Botão de Checklist Pré-Viagem */}
-          <button
-            type="button"
-            onClick={onOpenChecklist}
-            title="Checklist Pré-Viagem"
-            className={`p-2.5 rounded-xl border transition-all flex items-center justify-center ${
-              checklistDone
-                ? 'bg-slate-800 border-slate-700 text-emerald-400'
-                : 'bg-amber-600/20 hover:bg-amber-600/30 border-amber-500/30 text-amber-400 animate-pulse'
-            }`}
-          >
-            <Icon name="check-square" className="w-4 h-4" />
-          </button>
 
           {/* Botão de Logout */}
           <button

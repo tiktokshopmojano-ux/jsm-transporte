@@ -7,8 +7,7 @@ import { Icon } from '../common/Icons';
 export const DriverDesempenhoTab = ({
   user,
   viagens = [],
-  despesas = [],
-  checklistDone = false
+  despesas = []
 }) => {
   // Filtrar apenas viagens e despesas deste motorista específico
   const minhasViagens = viagens.filter(
@@ -68,13 +67,11 @@ export const DriverDesempenhoTab = ({
           <span className="text-[10px] text-slate-400 block">Sem insucessos no trajeto</span>
         </div>
 
-        {/* Card 3: Inspeções Pré-Viagem */}
+        {/* Card 3: Romaneios Validados */}
         <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl space-y-1">
-          <span className="text-slate-400 text-[11px] block">Inspeção Veicular</span>
-          <h4 className="text-xl font-extrabold text-emerald-400">
-            {checklistDone ? 'Em Dia' : 'Pendente'}
-          </h4>
-          <span className="text-[10px] text-slate-400 block">Segurança e conservação</span>
+          <span className="text-slate-400 text-[11px] block">Romaneios Auditados</span>
+          <h4 className="text-xl font-extrabold text-emerald-400">{totalViagensConcluidas}</h4>
+          <span className="text-[10px] text-slate-400 block">Sem pendências com central</span>
         </div>
 
         {/* Card 4: Combustível Auditado */}

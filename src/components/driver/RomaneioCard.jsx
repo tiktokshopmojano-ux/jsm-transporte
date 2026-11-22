@@ -12,7 +12,6 @@ export const RomaneioCard = ({
   tripCompleted,
   onOpenScanner,
   onOpenOcorrencia,
-  onOpenManualEdit,
   onRequestFinishTrip
 }) => {
   return (
@@ -104,24 +103,15 @@ export const RomaneioCard = ({
         </button>
       </div>
 
-      {/* Ações secundárias: Ajuste Manual e Reportar Ocorrência */}
-      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
-        <button
-          type="button"
-          onClick={onOpenManualEdit}
-          className="py-2 px-2 bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-[11px] font-medium flex items-center justify-center gap-1.5 transition-all"
-        >
-          <Icon name="edit" className="w-3.5 h-3.5 text-slate-400" />
-          Ajustar Dados
-        </button>
-
+      {/* Ação secundária: Reportar Ocorrência */}
+      <div className="pt-1 border-t border-slate-800">
         <button
           type="button"
           onClick={onOpenOcorrencia}
-          className="py-2 px-2 bg-red-950/40 hover:bg-red-900/40 text-red-300 border border-red-900/60 rounded-xl text-[11px] font-medium flex items-center justify-center gap-1.5 transition-all"
+          className="w-full py-2.5 px-3 bg-red-950/40 hover:bg-red-900/40 text-red-300 border border-red-900/60 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
         >
-          <Icon name="alert-triangle" className="w-3.5 h-3.5 text-red-400" />
-          Reportar Ocorrência
+          <Icon name="alert-triangle" className="w-4 h-4 text-red-400" />
+          Reportar Ocorrência na Rota
         </button>
       </div>
 

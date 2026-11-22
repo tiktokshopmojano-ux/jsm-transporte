@@ -4,11 +4,8 @@
 import React, { useState } from 'react';
 import { DriverHeader } from '../components/driver/DriverHeader';
 import { RomaneioCard } from '../components/driver/RomaneioCard';
-import { ParadasList } from '../components/driver/ParadasList';
-import { ChecklistModal } from '../components/driver/ChecklistModal';
 import { OcorrenciaModal } from '../components/driver/OcorrenciaModal';
 import { ScannerModal } from '../components/driver/ScannerModal';
-import { ManualEditModal } from '../components/driver/ManualEditModal';
 import { DriverHistoryModal } from '../components/driver/DriverHistoryModal';
 import { DriverDesempenhoTab } from '../components/driver/DriverDesempenhoTab';
 import { Modal } from '../components/common/Modal';
@@ -38,18 +35,15 @@ export const DriverView = ({
   const [driverTab, setDriverTab] = useState('rota');
 
   // Estados do Motorista
-  const [romaneio, setRomaneio] = useState(DEFAULT_ROMANEIO_DATA);
+  const [romaneio] = useState(DEFAULT_ROMANEIO_DATA);
   const [extractedData, setExtractedData] = useState(null);
   const [photoCaptured, setPhotoCaptured] = useState(false);
   const [tripCompleted, setTripCompleted] = useState(false);
-  const [checklistDone, setChecklistDone] = useState(false);
 
   // Modais
-  const [showChecklistModal, setShowChecklistModal] = useState(false);
   const [showOcorrenciaModal, setShowOcorrenciaModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
   const [scannerType, setScannerType] = useState('romaneio');
-  const [showManualEditModal, setShowManualEditModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showFinishConfirmModal, setShowFinishConfirmModal] = useState(false);
 
@@ -209,9 +203,7 @@ export const DriverView = ({
       <DriverHeader
         user={currentUser}
         todayDate={todayDate}
-        checklistDone={checklistDone}
         onLogout={onLogout}
-        onOpenChecklist={() => setShowChecklistModal(true)}
       />
 
       <main className="max-w-md mx-auto w-full p-4 flex-1 space-y-4">
@@ -247,25 +239,6 @@ export const DriverView = ({
         {/* CONTEÚDO DA ABA 1: ROTA & OPERAÇÃO */}
         {driverTab === 'rota' && (
           <>
-            {/* Banner de Aviso de Checklist */}
-            {!checklistDone && (
-              <div
-                onClick={() => setShowChecklistModal(true)}
-                className="p-3 bg-amber-950/40 border border-amber-600/40 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-amber-900/40 transition-all shadow-md"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Icon name="check-square" className="w-5 h-5 text-amber-400 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-amber-200">Inspeção Pré-Viagem Pendente</p>
-                    <p className="text-[11px] text-amber-300/80">Toque aqui para conferir pneus, óleo e odômetro.</p>
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg border border-amber-500/30">
-                  Fazer Agora
-                </span>
-              </div>
-            )}
-
             {/* Card do Romaneio */}
             <RomaneioCard
               romaneio={romaneio}
@@ -275,15 +248,7 @@ export const DriverView = ({
               tripCompleted={tripCompleted}
               onOpenScanner={handleOpenScanner}
               onOpenOcorrencia={() => setShowOcorrenciaModal(true)}
-              onOpenManualEdit={() => setShowManualEditModal(true)}
               onRequestFinishTrip={handleRequestFinishTrip}
-            />
-
-            {/* Lista de Paradas / Entregas da Rota com Waze / Google Maps */}
-            <ParadasList
-              onParadaAtualizada={(lista) => {
-                console.log('Paradas atualizadas pelo motorista:', lista);
-              }}
             />
 
             {/* Botão de Histórico de Viagens Concluídas */}
@@ -304,27 +269,11 @@ export const DriverView = ({
             user={currentUser}
             viagens={fbViagens}
             despesas={fbDespesas}
-            checklistDone={checklistDone}
           />
         )}
       </main>
 
       {/* MODAIS DO MOTORISTA */}
-      <ChecklistModal
-        isOpen={showChecklistModal}
-        onClose={() => setShowChecklistModal(false)}
-        user={currentUser}
-        todayDate={todayDate}
-        onChecklistCompleted={() => {
-          setChecklistDone(true);
-          onShowToast({
-            type: 'success',
-            title: 'Inspeção Registrada!',
-            desc: 'Checklist de segurança concluído. Boa viagem!'
-          });
-        }}
-      />
-
       <OcorrenciaModal
         isOpen={showOcorrenciaModal}
         onClose={() => setShowOcorrenciaModal(false)}
@@ -339,23 +288,6 @@ export const DriverView = ({
         scannerType={scannerType}
         todayDate={todayDate}
         onProcessScan={handleProcessScan}
-      />
-
-      <ManualEditModal
-        isOpen={showManualEditModal}
-        onClose={() => setShowManualEditModal(false)}
-        initialData={extractedData || romaneio}
-        onSave={(novosDados) => {
-          setRomaneio((prev) => ({ ...prev, ...novosDados }));
-          if (extractedData) {
-            setExtractedData((prev) => ({ ...prev, ...novosDados }));
-          }
-          onShowToast({
-            type: 'info',
-            title: 'Romaneio Atualizado',
-            desc: 'Dados ajustados com sucesso.'
-          });
-        }}
       />
 
       <DriverHistoryModal
