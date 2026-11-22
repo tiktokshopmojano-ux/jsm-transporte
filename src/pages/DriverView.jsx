@@ -1,7 +1,7 @@
 // src/pages/DriverView.jsx
 // Visualização completa e moderna para o motorista no smartphone / tablet
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DriverHeader } from '../components/driver/DriverHeader';
 import { RomaneioCard } from '../components/driver/RomaneioCard';
 import { OcorrenciaModal } from '../components/driver/OcorrenciaModal';
@@ -31,8 +31,34 @@ export const DriverView = ({
   onLogout,
   onShowToast
 }) => {
-  // Aba do Motorista ('rota' | 'desempenho')
-  const [driverTab, setDriverTab] = useState('rota');
+  // Sincronização da aba do motorista com a URL e histórico do navegador
+  const getDriverHashTab = () => {
+    const hash = window.location.hash.replace('#', '');
+    return hash === 'desempenho' ? 'desempenho' : 'rota';
+  };
+
+  const [driverTab, setDriverTab] = useState(getDriverHashTab);
+
+  const handleSelectDriverTab = (tabId) => {
+    setDriverTab(tabId);
+    if (window.location.hash !== '#' + tabId) {
+      window.history.pushState({ tab: tabId }, '', '#' + tabId);
+    }
+  };
+
+  // Suporte ao botão voltar do celular/navegador
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.history.replaceState({ tab: 'rota' }, '', '#rota');
+    }
+
+    const handlePopState = () => {
+      setDriverTab(getDriverHashTab());
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Estados do Motorista
   const [romaneio] = useState(DEFAULT_ROMANEIO_DATA);
@@ -211,7 +237,7 @@ export const DriverView = ({
         <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-2xl border border-slate-800 text-xs font-bold">
           <button
             type="button"
-            onClick={() => setDriverTab('rota')}
+            onClick={() => handleSelectDriverTab('rota')}
             className={`py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
               driverTab === 'rota'
                 ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
@@ -224,7 +250,7 @@ export const DriverView = ({
 
           <button
             type="button"
-            onClick={() => setDriverTab('desempenho')}
+            onClick={() => handleSelectDriverTab('desempenho')}
             className={`py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
               driverTab === 'desempenho'
                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'

@@ -21,9 +21,29 @@ const getTodayDateString = () => {
 };
 
 export default function App() {
-  // Estado de Autenticação e Usuário
-  const [currentUser, setCurrentUser] = useState(null);
+  // Estado de Autenticação e Usuário Persistente em LocalStorage (Evita deslogar no F5)
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const sessaoSalva = localStorage.getItem('jsm_session_user');
+      return sessaoSalva ? JSON.parse(sessaoSalva) : null;
+    } catch {
+      return null;
+    }
+  });
   const [loginError, setLoginError] = useState('');
+
+  // Salvar sessão automaticamente no LocalStorage
+  useEffect(() => {
+    try {
+      if (currentUser) {
+        localStorage.setItem('jsm_session_user', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('jsm_session_user');
+      }
+    } catch (e) {
+      console.warn('Erro ao persistir sessão no navegador:', e);
+    }
+  }, [currentUser]);
 
   // Notificações Toast
   const [toast, setToast] = useState(null);
@@ -255,6 +275,10 @@ export default function App() {
     } catch (e) {
       console.warn('Erro no logout do Firebase:', e);
     }
+    try {
+      localStorage.removeItem('jsm_session_user');
+      window.location.hash = '';
+    } catch {}
     setCurrentUser(null);
     setToast({
       type: 'info',

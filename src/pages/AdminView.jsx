@@ -1,7 +1,7 @@
 // src/pages/AdminView.jsx
 // Visualização completa e moderna do Painel Administrativo
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdminHeader } from '../components/admin/AdminHeader';
 import { AdminNavigation } from '../components/admin/AdminNavigation';
 import { DashboardTab } from '../components/admin/tabs/DashboardTab';
@@ -28,7 +28,47 @@ export const AdminView = ({
   onLogout,
   onShowToast
 }) => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const validTabs = [
+    'dashboard',
+    'viagens',
+    'despesas',
+    'lucro-liquido',
+    'frota',
+    'motoristas',
+    'ocorrencias',
+    'metas',
+    'expansao',
+    'configuracoes'
+  ];
+
+  const getHashTab = () => {
+    const hash = window.location.hash.replace('#', '');
+    return validTabs.includes(hash) ? hash : 'dashboard';
+  };
+
+  const [activeTab, setActiveTab] = useState(getHashTab);
+
+  // Sincronizar mudança de aba com o histórico do navegador
+  const handleSelectTab = (tabId) => {
+    setActiveTab(tabId);
+    if (window.location.hash !== '#' + tabId) {
+      window.history.pushState({ tab: tabId }, '', '#' + tabId);
+    }
+  };
+
+  // Suporte ao botão 'Voltar' do navegador para navegar entre abas sem sair do app
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
+    }
+
+    const handlePopState = () => {
+      setActiveTab(getHashTab());
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const despesasPendentes = fbDespesas.filter((d) => d.status === 'Pendente').length;
   const ocorrenciasAbertas = fbOcorrencias.filter((o) => o.status === 'Aberta').length;
@@ -42,10 +82,10 @@ export const AdminView = ({
         onLogout={onLogout}
       />
 
-      {/* Navegação de Abas */}
+      {/* Navegação de Abas com suporte a histórico */}
       <AdminNavigation
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={handleSelectTab}
         despesasPendentes={despesasPendentes}
         ocorrenciasAbertas={ocorrenciasAbertas}
       />
