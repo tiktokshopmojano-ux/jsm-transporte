@@ -30,7 +30,8 @@ export const AdminNavigation = ({
       badgeColor: 'bg-red-500 text-white animate-pulse'
     },
     { id: 'metas', label: 'Metas', icon: 'target' },
-    { id: 'expansao', label: 'Expansão', icon: 'rocket' }
+    { id: 'expansao', label: 'Expansão', icon: 'rocket' },
+    { id: 'configuracoes', label: 'Configurações', icon: 'settings' }
   ];
 
   return (

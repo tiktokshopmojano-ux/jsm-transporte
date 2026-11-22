@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { Icon } from '../../common/Icons';
 import { Modal } from '../../common/Modal';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../../services/firebase';
 
 export const DespesasTab = ({ despesas = [], onShowToast }) => {
@@ -13,6 +13,29 @@ export const DespesasTab = ({ despesas = [], onShowToast }) => {
   const [motivoRejeicao, setMotivoRejeicao] = useState('');
   const [showRejeitarModal, setShowRejeitarModal] = useState(false);
   const [despesaParaRejeitar, setDespesaParaRejeitar] = useState(null);
+  const [despesaParaExcluir, setDespesaParaExcluir] = useState(null);
+  const [excluindo, setExcluindo] = useState(false);
+
+  const handleExcluirDespesa = async () => {
+    if (!despesaParaExcluir) return;
+    setExcluindo(true);
+    try {
+      await deleteDoc(doc(db, 'despesas', despesaParaExcluir.id));
+      if (onShowToast) {
+        onShowToast({
+          type: 'info',
+          title: 'Despesa Excluída',
+          desc: 'Registro removido da base com sucesso.'
+        });
+      }
+      setDespesaParaExcluir(null);
+    } catch (err) {
+      console.error('Erro ao excluir despesa:', err);
+      alert('Erro ao excluir despesa no Firebase.');
+    } finally {
+      setExcluindo(false);
+    }
+  };
 
   const despesasFiltradas = despesas.filter((d) => {
     if (filtroStatus === 'Todos') return true;
@@ -180,6 +203,15 @@ export const DespesasTab = ({ despesas = [], onShowToast }) => {
                       </button>
                     </>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={() => setDespesaParaExcluir(despesa)}
+                    title="Excluir lançamento incorreto"
+                    className="p-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-300 rounded-lg border border-red-900/60 transition-colors"
+                  >
+                    <Icon name="trash" className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             );
@@ -249,6 +281,44 @@ export const DespesasTab = ({ despesas = [], onShowToast }) => {
           </div>
         </div>
       </Modal>
+
+      {/* Modal de Exclusão de Despesa */}
+      {despesaParaExcluir && (
+        <Modal
+          isOpen={true}
+          onClose={() => setDespesaParaExcluir(null)}
+          title="Excluir Despesa Incorreta?"
+          subtitle="Essa ação removerá o comprovante e ajustará as contas da empresa"
+        >
+          <div className="space-y-4 text-xs text-center">
+            <div className="w-12 h-12 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto">
+              <Icon name="trash" className="w-6 h-6" />
+            </div>
+            <p className="text-slate-300">
+              Deseja apagar a despesa de <strong className="text-white">{despesaParaExcluir.tipo}</strong> no valor de{' '}
+              <strong className="text-amber-400">R$ {despesaParaExcluir.valor}</strong> enviada por{' '}
+              <strong className="text-white">{despesaParaExcluir.motorista}</strong>?
+            </p>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDespesaParaExcluir(null)}
+                className="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={excluindo}
+                onClick={handleExcluirDespesa}
+                className="py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold shadow-lg shadow-red-900/30 transition-all flex items-center justify-center gap-2"
+              >
+                {excluindo ? 'Excluindo...' : 'Sim, Excluir'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

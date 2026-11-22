@@ -10,6 +10,7 @@ import { OcorrenciaModal } from '../components/driver/OcorrenciaModal';
 import { ScannerModal } from '../components/driver/ScannerModal';
 import { ManualEditModal } from '../components/driver/ManualEditModal';
 import { DriverHistoryModal } from '../components/driver/DriverHistoryModal';
+import { DriverDesempenhoTab } from '../components/driver/DriverDesempenhoTab';
 import { Modal } from '../components/common/Modal';
 import { Icon } from '../components/common/Icons';
 import { addDoc, collection } from 'firebase/firestore';
@@ -27,11 +28,15 @@ export const DriverView = ({
   currentUser,
   todayDate,
   fbViagens = [],
+  fbDespesas = [],
   usedRomaneioRecords = [],
   setUsedRomaneioRecords,
   onLogout,
   onShowToast
 }) => {
+  // Aba do Motorista ('rota' | 'desempenho')
+  const [driverTab, setDriverTab] = useState('rota');
+
   // Estados do Motorista
   const [romaneio, setRomaneio] = useState(DEFAULT_ROMANEIO_DATA);
   const [extractedData, setExtractedData] = useState(null);
@@ -210,54 +215,98 @@ export const DriverView = ({
       />
 
       <main className="max-w-md mx-auto w-full p-4 flex-1 space-y-4">
-        {/* Banner de Aviso de Checklist */}
-        {!checklistDone && (
-          <div
-            onClick={() => setShowChecklistModal(true)}
-            className="p-3 bg-amber-950/40 border border-amber-600/40 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-amber-900/40 transition-all shadow-md"
+        {/* Seletor de Abas do Motorista: Rota vs Meu Desempenho */}
+        <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-2xl border border-slate-800 text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => setDriverTab('rota')}
+            className={`py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
+              driverTab === 'rota'
+                ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
           >
-            <div className="flex items-center gap-2.5">
-              <Icon name="check-square" className="w-5 h-5 text-amber-400 shrink-0" />
-              <div>
-                <p className="text-xs font-bold text-amber-200">Inspeção Pré-Viagem Pendente</p>
-                <p className="text-[11px] text-amber-300/80">Toque aqui para conferir pneus, óleo e odômetro.</p>
+            <Icon name="truck" className="w-4 h-4" />
+            Minha Rota
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setDriverTab('desempenho')}
+            className={`py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 ${
+              driverTab === 'desempenho'
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Icon name="award" className="w-4 h-4" />
+            Meu Desempenho
+          </button>
+        </div>
+
+        {/* CONTEÚDO DA ABA 1: ROTA & OPERAÇÃO */}
+        {driverTab === 'rota' && (
+          <>
+            {/* Banner de Aviso de Checklist */}
+            {!checklistDone && (
+              <div
+                onClick={() => setShowChecklistModal(true)}
+                className="p-3 bg-amber-950/40 border border-amber-600/40 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-amber-900/40 transition-all shadow-md"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Icon name="check-square" className="w-5 h-5 text-amber-400 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-amber-200">Inspeção Pré-Viagem Pendente</p>
+                    <p className="text-[11px] text-amber-300/80">Toque aqui para conferir pneus, óleo e odômetro.</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg border border-amber-500/30">
+                  Fazer Agora
+                </span>
               </div>
-            </div>
-            <span className="text-[10px] font-bold px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg border border-amber-500/30">
-              Fazer Agora
-            </span>
-          </div>
+            )}
+
+            {/* Card do Romaneio */}
+            <RomaneioCard
+              romaneio={romaneio}
+              extractedData={extractedData}
+              todayDate={todayDate}
+              photoCaptured={photoCaptured}
+              tripCompleted={tripCompleted}
+              onOpenScanner={handleOpenScanner}
+              onOpenOcorrencia={() => setShowOcorrenciaModal(true)}
+              onOpenManualEdit={() => setShowManualEditModal(true)}
+              onRequestFinishTrip={handleRequestFinishTrip}
+            />
+
+            {/* Lista de Paradas / Entregas da Rota com Waze / Google Maps */}
+            <ParadasList
+              onParadaAtualizada={(lista) => {
+                console.log('Paradas atualizadas pelo motorista:', lista);
+              }}
+            />
+
+            {/* Botão de Histórico de Viagens Concluídas */}
+            <button
+              type="button"
+              onClick={() => setShowHistoryModal(true)}
+              className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-sm"
+            >
+              <Icon name="history" className="w-4 h-4 text-cyan-400" />
+              Ver Minhas Viagens Concluídas ({motoristaTrips.length})
+            </button>
+          </>
         )}
 
-        {/* Card do Romaneio */}
-        <RomaneioCard
-          romaneio={romaneio}
-          extractedData={extractedData}
-          todayDate={todayDate}
-          photoCaptured={photoCaptured}
-          tripCompleted={tripCompleted}
-          onOpenScanner={handleOpenScanner}
-          onOpenOcorrencia={() => setShowOcorrenciaModal(true)}
-          onOpenManualEdit={() => setShowManualEditModal(true)}
-          onRequestFinishTrip={handleRequestFinishTrip}
-        />
-
-        {/* Lista de Paradas / Entregas da Rota com Waze / Google Maps */}
-        <ParadasList
-          onParadaAtualizada={(lista) => {
-            console.log('Paradas atualizadas pelo motorista:', lista);
-          }}
-        />
-
-        {/* Botão de Histórico de Viagens Concluídas */}
-        <button
-          type="button"
-          onClick={() => setShowHistoryModal(true)}
-          className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-sm"
-        >
-          <Icon name="history" className="w-4 h-4 text-cyan-400" />
-          Ver Minhas Viagens Concluídas ({motoristaTrips.length})
-        </button>
+        {/* CONTEÚDO DA ABA 2: MEU DESEMPENHO (100% SOMENTE LEITURA) */}
+        {driverTab === 'desempenho' && (
+          <DriverDesempenhoTab
+            user={currentUser}
+            viagens={fbViagens}
+            despesas={fbDespesas}
+            checklistDone={checklistDone}
+          />
+        )}
       </main>
 
       {/* MODAIS DO MOTORISTA */}

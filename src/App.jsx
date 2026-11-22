@@ -9,7 +9,7 @@ import {
   signInWithEmailAndPassword,
   signOut
 } from 'firebase/auth';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, doc, onSnapshot } from 'firebase/firestore';
 
 import { LoginView } from './pages/LoginView';
 import { DriverView } from './pages/DriverView';
@@ -37,6 +37,14 @@ export default function App() {
   const [fbViagens, setFbViagens] = useState([]);
   const [fbDespesas, setFbDespesas] = useState([]);
   const [fbOcorrencias, setFbOcorrencias] = useState([]);
+  const [metasConfig, setMetasConfig] = useState({
+    metaFaturamentoMes: 120000,
+    metaFaturamentoAno: 1500000,
+    metaViagensMes: 180,
+    metaConsumoKmL: 10.0,
+    diasUteisMes: 26,
+    percentualExpansao: 20
+  });
   const [totalSystemRevenue, setTotalSystemRevenue] = useState(0);
   const [usedRomaneioRecords, setUsedRomaneioRecords] = useState([]);
 
@@ -144,6 +152,17 @@ export default function App() {
       (err) => console.error('Erro ao escutar viagens:', err)
     );
 
+    // Listener de Configurações de Metas
+    const unsubMetas = onSnapshot(
+      doc(db, 'configuracoes', 'metas'),
+      (snap) => {
+        if (snap.exists()) {
+          setMetasConfig((prev) => ({ ...prev, ...snap.data() }));
+        }
+      },
+      (err) => console.warn('Metas padrão em uso:', err)
+    );
+
     return () => {
       unsubAuth();
       unsubMotoristas();
@@ -151,6 +170,7 @@ export default function App() {
       unsubDespesas();
       unsubOcorrencias();
       unsubViagens();
+      unsubMetas();
     };
   }, []);
 
@@ -243,6 +263,7 @@ export default function App() {
           currentUser={currentUser}
           todayDate={todayDate}
           fbViagens={fbViagens}
+          fbDespesas={fbDespesas}
           usedRomaneioRecords={usedRomaneioRecords}
           setUsedRomaneioRecords={setUsedRomaneioRecords}
           onLogout={handleLogout}
@@ -264,6 +285,7 @@ export default function App() {
         fbVeiculos={fbVeiculos}
         fbMotoristas={fbMotoristas}
         fbOcorrencias={fbOcorrencias}
+        metasConfig={metasConfig}
         onLogout={handleLogout}
         onShowToast={(t) => setToast(t)}
       />

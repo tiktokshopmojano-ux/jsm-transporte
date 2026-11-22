@@ -4,11 +4,36 @@
 import React, { useState } from 'react';
 import { Icon } from '../../common/Icons';
 import { Modal } from '../../common/Modal';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { db } from '../../../services/firebase';
 
-export const ViagensTab = ({ viagens = [] }) => {
+export const ViagensTab = ({ viagens = [], onShowToast }) => {
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('todos');
   const [viagemDetalhe, setViagemDetalhe] = useState(null);
+  const [viagemParaExcluir, setViagemParaExcluir] = useState(null);
+  const [excluindo, setExcluindo] = useState(false);
+
+  const handleExcluirViagem = async () => {
+    if (!viagemParaExcluir) return;
+    setExcluindo(true);
+    try {
+      await deleteDoc(doc(db, 'viagens', viagemParaExcluir.id));
+      if (onShowToast) {
+        onShowToast({
+          type: 'info',
+          title: 'Viagem Excluída',
+          desc: 'Registro removido do faturamento com sucesso.'
+        });
+      }
+      setViagemParaExcluir(null);
+    } catch (err) {
+      console.error('Erro ao excluir viagem:', err);
+      alert('Erro ao excluir viagem no Firebase.');
+    } finally {
+      setExcluindo(false);
+    }
+  };
 
   // Filtragem dinâmica
   const viagensFiltradas = viagens.filter((item) => {
@@ -147,6 +172,15 @@ export const ViagensTab = ({ viagens = [] }) => {
                   <Icon name="eye" className="w-3.5 h-3.5" />
                   Ver Detalhes
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViagemParaExcluir(log)}
+                  title="Excluir viagem incorreta ou duplicada"
+                  className="p-2 bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-300 rounded-lg border border-red-900/60 transition-colors"
+                >
+                  <Icon name="trash" className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           ))
@@ -194,6 +228,46 @@ export const ViagensTab = ({ viagens = [] }) => {
               <p className="p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-[11px] text-cyan-300 font-mono">
                 {viagemDetalhe.romaneioArquivo || 'Foto direta capturada'}
               </p>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal de Exclusão de Viagem Incorreta */}
+      {viagemParaExcluir && (
+        <Modal
+          isOpen={true}
+          onClose={() => setViagemParaExcluir(null)}
+          title="Excluir Registro de Viagem?"
+          subtitle="Essa ação limpará a viagem do faturamento e dos relatórios"
+        >
+          <div className="space-y-4 text-xs text-center">
+            <div className="w-12 h-12 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto">
+              <Icon name="trash" className="w-6 h-6" />
+            </div>
+            <p className="text-slate-300">
+              Deseja remover permanentemente a viagem do motorista{' '}
+              <strong className="text-white">{viagemParaExcluir.motorista}</strong> (Placa {viagemParaExcluir.placa})?
+            </p>
+            <p className="text-amber-400 font-semibold">
+              Valor de R$ {viagemParaExcluir.valor} será deduzido do total de faturamento.
+            </p>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setViagemParaExcluir(null)}
+                className="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={excluindo}
+                onClick={handleExcluirViagem}
+                className="py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold shadow-lg shadow-red-900/30 transition-all flex items-center justify-center gap-2"
+              >
+                {excluindo ? 'Excluindo...' : 'Sim, Excluir'}
+              </button>
             </div>
           </div>
         </Modal>

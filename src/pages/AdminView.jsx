@@ -12,6 +12,7 @@ import { MotoristasTab } from '../components/admin/tabs/MotoristasTab';
 import { OcorrenciasTab } from '../components/admin/tabs/OcorrenciasTab';
 import { MetasTab } from '../components/admin/tabs/MetasTab';
 import { ExpansaoTab } from '../components/admin/tabs/ExpansaoTab';
+import { ConfiguracoesTab } from '../components/admin/tabs/ConfiguracoesTab';
 
 export const AdminView = ({
   currentUser,
@@ -21,6 +22,7 @@ export const AdminView = ({
   fbVeiculos = [],
   fbMotoristas = [],
   fbOcorrencias = [],
+  metasConfig = {},
   onLogout,
   onShowToast
 }) => {
@@ -61,7 +63,7 @@ export const AdminView = ({
         )}
 
         {activeTab === 'viagens' && (
-          <ViagensTab viagens={fbViagens} />
+          <ViagensTab viagens={fbViagens} onShowToast={onShowToast} />
         )}
 
         {activeTab === 'despesas' && (
@@ -88,11 +90,26 @@ export const AdminView = ({
         )}
 
         {activeTab === 'metas' && (
-          <MetasTab totalViagens={fbViagens.length} />
+          <MetasTab
+            totalRevenue={totalRevenue}
+            totalViagens={fbViagens.length}
+            metasConfig={metasConfig}
+            onSelectTab={setActiveTab}
+          />
         )}
 
         {activeTab === 'expansao' && (
           <ExpansaoTab totalRevenue={totalRevenue} />
+        )}
+
+        {activeTab === 'configuracoes' && (
+          <ConfiguracoesTab
+            metasConfig={metasConfig}
+            viagens={fbViagens}
+            despesas={fbDespesas}
+            ocorrencias={fbOcorrencias}
+            onShowToast={onShowToast}
+          />
         )}
       </main>
     </div>
